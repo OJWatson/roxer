@@ -1,0 +1,44 @@
+---
+title: "Title"
+author: "OJ Watson"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+  word_document:
+  highlight: textmate
+  html_document:
+theme: lumen
+toc: yes
+toc_float: yes
+toc_depth: 2
+editor_options: 
+  chunk_output_type: console
+---
+  
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, eval = T, warning = F, message = F)
+```
+```{r packages, echo=F, warning=F, message=F, results='hide'}
+library(ggplot2)
+```
+
+# Methods
+
+The data was ...
+
+# Results
+
+The results of ...
+
+```{r}
+#load(file = "analysis/data/derived/output.rda")
+```
+
+## Figures
+```{r, fig.align='center', fig.height=8, fig.width=6}
+#fig1
+```
+
+# Discussion
+
+The findings from ...

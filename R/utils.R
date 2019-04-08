@@ -5,7 +5,7 @@
 
 
 # call_tree
-match.call.defaults <- function(...) {
+match_call_defaults <- function(...) {
   call <- evalq(match.call(expand.dots = FALSE), parent.frame(1))
   formals <- evalq(formals(), parent.frame(1))
 
@@ -15,12 +15,6 @@ match.call.defaults <- function(...) {
 
   match.call(sys.function(sys.parent()), call)
 }
-
-# open file outside'
-sopen <- function(txt_path) system(paste0("open ","\"",txt_path,"\""))
-
-# open folder outside
-sdir <- function(x)  {if(Sys.info()["sysname"] == "Windows") shell.exec(x) else system2("open", x)}
 
 # chracterise vector
 rechar_vec <- function(what) cat(paste0("c(\"",paste0(what,collapse="\",\""),"\")"))
@@ -69,12 +63,13 @@ param_formals <- function(FUN){
 }
 
 ranges <- function(diff = 12, end = 132){
-  
+
   r <- list();
   for(i in 1:(end/diff)){
-    
-    r[[i]] <- (1 + ((i-1) * 12)) : (diff*i)
-    
+
+    r[[i]] <- (1 + ((i-1) * diff)) : (diff*i)
+
   }
-  
+
+  return(ranges)
 }

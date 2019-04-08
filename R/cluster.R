@@ -1,5 +1,6 @@
 contextualise <- function(workdir = "M:/OJ/MAGENTA_Results",
                           packages = c("MAGENTA"),
+                          linux = TRUE,
                           package_sources = provisionr::package_sources(
                             local=getwd()),
                           new_dir = "tests",
@@ -10,6 +11,29 @@ contextualise <- function(workdir = "M:/OJ/MAGENTA_Results",
                           initialise=TRUE){
 
   dir.create(paste0(workdir,"/",new_dir),showWarnings = FALSE)
+  if(linux) {
+
+    workdir <- gsub("M:/OJ","/home/oj/net/Malaria/OJ",workdir)
+    if(grep("nas", workdir)){
+      home <- "//fi--didenas1/Malaria"
+      local_home <- "/home/oj/net/nas"
+    } else{
+      home <- "//fi--didef3.dide.ic.ac.uk/Malaria"
+      local_home <- "/home/oj/net/Malaria"
+    }
+    didehpc::didehpc_config_global(workdir=workdir,
+                                   credentials="/home/oj/.smbcredentials",
+                                   temp=didehpc::path_mapping("tmp",
+                                                              "/home/oj/net/temp",
+                                                              "//fi--didef3.dide.ic.ac.uk/tmp",
+                                                              "T:"),
+                                   home=didehpc::path_mapping("OJ",
+                                                              local_home,
+                                                              home,
+                                                              "M:"),
+                                   cluster = cluster)
+  } else {
+
   didehpc::didehpc_config_global(workdir=workdir,
                                  credentials="C:\\Users\\Oliver\\.smbcredentials",
                                  temp=didehpc::path_mapping("tmp",
@@ -21,6 +45,8 @@ contextualise <- function(workdir = "M:/OJ/MAGENTA_Results",
                                                             "//fi--didef3.dide.ic.ac.uk/Malaria",
                                                             "M:"),
                                  cluster = cluster)
+  }
+
   didehpc::web_login()
 
   root <- file.path(workdir, new_dir)
@@ -54,14 +80,15 @@ redrat <- function(package = "MAGENTA"){
 }
 
 
-retry <- function(dir = "GEM",  initialise = TRUE, ...){
+retry <- function(dir = "GEM", root = "/home/oj/net/Malaria/OJ/MAGENTA_Results/",
+                  package = "magenta", initialise = TRUE, ...){
 
   if(exists("obj") & exists("grp")){
     obj$task_status_dide(grp$ids)
   }
-  f0 <- paste0("M:/OJ/MAGENTA_Results/",dir,"/lib/windows/3.5/MAGENTA/")
+  f0 <- paste0(root,dir,"/lib/windows/3.5/",package,"/")
   f1 <- paste0(f0, c("libs","R","extdata"))
-  f2 <- paste0("C:/Program Files/R/R-3.5.0/library/MAGENTA/",
+  f2 <- paste0("/home/oj/R/x86_64-pc-linux-gnu-library/3.5/",package,"/",
                c("libs","R","extdata"))
 
 
@@ -72,7 +99,7 @@ retry <- function(dir = "GEM",  initialise = TRUE, ...){
   for(i in 1:length(f1)){
     file.copy(f2[i],f0,recursive = TRUE, overwrite = TRUE)
   }
-  obj <- contextualise(new_dir = dir,use_workers = FALSE,cluster="fi--didemrchnb", rtools = TRUE)
+  obj <- contextualise(new_dir = dir,packages=package,..., rtools = TRUE)
 
 
   return(obj)
@@ -85,4 +112,26 @@ logs <- function(grp){
 
 cluster_result <- function(x){
   x$root$db$driver$get_object(hash = x$root$db$driver$get_hash(x$id,"task_results"))
+}
+
+grps_list <- function(obj, reg=NULL){
+  nms <- obj$task_bundle_list()
+  if (!is.null(reg)) {
+    nms <- grep(reg, nms, value = TRUE)
+  }
+  grps <- lapply(nms, function(x) obj$task_bundle_get(x))
+  names(grps) <- nms
+  return(grps)
+}
+
+try_fail_catch <- function(expr, attempts = 3){
+  r <- NULL
+  attempt <- 1
+  while( is.null(r) && attempt <= 3 ) {
+    attempt <- attempt + 1
+    try(
+      r <- eval(expr)
+    )
+  }
+
 }
