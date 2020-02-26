@@ -7,14 +7,20 @@ contextualise <- function(workdir = "M:/OJ/MAGENTA_Results",
                           use_workers=TRUE,
                           sources=NULL,
                           cluster = "fi--dideclusthn",
+                          cores=NULL,
                           rtools=TRUE,
+                          template=NULL,
                           initialise=TRUE){
+
+  if (is.null(template)){
+  template <- "GeneralNodes"
+  }
 
   dir.create(paste0(workdir,"/",new_dir),showWarnings = FALSE)
   if(linux) {
 
     workdir <- gsub("M:/OJ","/home/oj/net/Malaria/OJ",workdir)
-    if(grep("nas", workdir)){
+    if(grepl("nas", workdir)){
       home <- "//fi--didenas1/Malaria"
       local_home <- "/home/oj/net/nas"
     } else{
@@ -58,7 +64,16 @@ contextualise <- function(workdir = "M:/OJ/MAGENTA_Results",
                                packages = packages.vector,
                                package_sources = package_sources)
 
-  config <- didehpc::didehpc_config(use_workers = use_workers, rtools = rtools)
+  if(is.null(cores)){
+  config <- didehpc::didehpc_config(use_workers = use_workers, rtools = rtools,
+                                    template = template)
+  } else {
+    config <- didehpc::didehpc_config(use_workers = use_workers, rtools = rtools,
+                                      template = template,cores = cores)
+  }
+  config$resource$parallel <- "FALSE"
+  config$resource$type <- "Cores"
+
   obj <- didehpc::queue_didehpc(ctx, config = config,initialise = initialise)
   return(obj)
 }
@@ -133,5 +148,67 @@ try_fail_catch <- function(expr, attempts = 3){
       r <- eval(expr)
     )
   }
+
+}
+
+
+task_status_dide_compare_new <- function (obj, task_ids = NULL)
+{
+  status_check <- c("PENDING", "RUNNING")
+  if (is.null(task_ids)) {
+    task_ids <- obj$task_list()
+  }
+  st_ctx <- obj$task_status(task_ids)
+  db <- obj$db
+  i <- st_ctx %in% status_check
+  if (!any(i)) {
+    return(data.frame(id = character(0), old = character(0),
+                      hpc = character(0), new = character(0), stringsAsFactors = FALSE))
+  }
+  task_ids <- task_ids[i]
+  st_ctx <- st_ctx[i]
+  message("Fetching job status from the cluster...")
+  dat <- didehpc:::didehpc_jobstatus(obj$config)
+  message("  ...done")
+
+  i <- match(task_ids, dat$name)
+  if (any(is.na(i))) {
+    if(inherits(obj$rrq, "rrq_controller")) {
+      work <-  obj$rrq$worker_task_id()
+      i[is.na(i)] <- names(work)[match(task_ids[is.na(i)], work)]
+      i <-  match(i, dat$name)
+    }
+    if (any(is.na(i))) {
+      stop("Did not find information on tasks: ", paste(task_ids[is.na(i)],
+                                                        collapse = ", "))
+    }
+
+  }
+  st_hpc <- dat$status[i]
+  st_new <- dat$status[i]
+  i <- st_hpc == "COMPLETE" & st_ctx %in% status_check
+  if (any(i)) {
+    check <- obj$task_status(task_ids[i])
+    j <- !(check %in% status_check)
+    if (any(j)) {
+      drop <- which(i)[j]
+      task_ids <- task_ids[-drop]
+      st_ctx <- st_ctx[-drop]
+      st_hpc <- st_hpc[-drop]
+    }
+  }
+  st_new[st_hpc == "COMPLETE"] <- "ERROR"
+  data.frame(id = unname(task_ids), old = unname(st_ctx),
+             hpc = unname(st_hpc), new = unname(st_new), stringsAsFactors = FALSE)
+}
+
+
+task_change <- function(task_ids, obj, old, new){
+
+
+  dat <- data.frame(id = (task_ids), old = old,
+             hpc = new, new = new, stringsAsFactors = FALSE)
+  didehpc:::task_status_dide_update(obj, dat)
+  didehpc:::task_status_dide_report(dat)
 
 }

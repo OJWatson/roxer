@@ -4,10 +4,16 @@ Title: Roxygen and other package development assistance
 Version: 0.1.0
 Maintainer: OJ Watson <oj.watson@hotmail.co.uk>
 Description: Provides functionality to help write package annotations
-    and documentation.
+    and documentation as well as other miscellaneous functions that don't 
+    neatly fit in anywhere else, inclduing mapping. 
 License: MIT
 Encoding: UTF-8
 LazyData: true
 Imports: 
-    here
-RoxygenNote: 6.1.1
+    here,
+    rworldmap,
+    sp,
+    ggplot2, 
+    rgeos,
+    dplyr
+RoxygenNote: 7.0.0
