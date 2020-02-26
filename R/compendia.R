@@ -19,6 +19,7 @@ minimial_compendia <- function(path){
 
   usethis::use_git()
 
-  usethis:::open_project(usethis::proj_get())
+  p <- usethis::proj_get()
+  system(paste("xdg-open",paste0(a,"/",basename(a),".Rproj")))
 
 }

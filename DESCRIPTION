@@ -2,6 +2,7 @@ Package: roxer
 Type: Package
 Title: Roxygen and other package development assistance
 Version: 0.1.0
+Author: OJ Watson <oj.watson@hotmail.co.uk>
 Maintainer: OJ Watson <oj.watson@hotmail.co.uk>
 Description: Provides functionality to help write package annotations
     and documentation as well as other miscellaneous functions that don't 
@@ -15,5 +16,13 @@ Imports:
     sp,
     ggplot2, 
     rgeos,
-    dplyr
+    dplyr,
+    context, 
+    didehpc,
+    devtools, 
+    drat,
+    usethis,
+    xml2
+Remotes: 
+    mrc-ide/didehpc
 RoxygenNote: 7.0.0
