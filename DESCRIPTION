@@ -22,7 +22,9 @@ Imports:
     devtools, 
     drat,
     usethis,
-    xml2
+    xml2,
+    orderly
 Remotes: 
-    mrc-ide/didehpc
-RoxygenNote: 7.0.0
+    mrc-ide/didehpc,
+    vimc/orderly
+RoxygenNote: 7.1.1

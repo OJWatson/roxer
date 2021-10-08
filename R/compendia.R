@@ -23,3 +23,32 @@ minimial_compendia <- function(path){
   system(paste("xdg-open",paste0(a,"/",basename(a),".Rproj")))
 
 }
+
+
+
+
+pckgs_in_dir <- function(dir) {
+
+  fs <- list.files(dir, full.names = TRUE)
+  fs <- grep("\\.R$", fs, value = TRUE)
+  pckgs <- c()
+  for(f in fs) {
+
+    file_lines <- readLines(con = f)
+
+    ps <- lapply(file_lines, function(l) {
+      if(grepl("::", l)){
+        gsub(".*?([[:alnum:]\\.]+)::.*","\\1", l)
+      } else {
+        return(NULL)
+      }
+
+    })
+
+    pckgs <- c(pckgs, unique(unlist(ps)))
+
+  }
+
+  return(unique(pckgs))
+
+}

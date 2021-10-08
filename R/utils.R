@@ -19,6 +19,8 @@ match_call_defaults <- function(...) {
 # chracterise vector
 rechar_vec <- function(what) cat(paste0("c(\"",paste0(what,collapse="\",\""),"\")"))
 
+renum_vec <- function(what) cat(paste0("c(",paste0(what,collapse=","),")"))
+
 # itemise vector
 itemise_vec <- function(what) {
   cat("##' \\itemize{\n")

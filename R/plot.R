@@ -143,6 +143,32 @@ map_plot <- function(df, lat= "Lat",long="Long", type = "point") {
 }
 
 
+save_figs <- function(name,
+                      fig,
+                      width = 6,
+                      height = 6,
+                      root = "analysis/manuscript/edits_hoseah/comments/latest/last/lastest/latest_latest/revisions/figures") {
+
+  dir.create(root, showWarnings = FALSE)
+  fig_path <- function(name) {paste0(root, "/", name)}
+
+  cowplot::save_plot(filename = fig_path(paste0(name,".png")),
+                     plot = fig,
+                     base_height = height,
+                     base_width = width)
+
+  svg(filename = fig_path(paste0(name,".svg")), width = width, height = height)
+  print(fig)
+  dev.off()
+
+  pdf(file = fig_path(paste0(name,".pdf")), width = width, height = height)
+  print(fig)
+  dev.off()
+
+
+}
+
+
 # Facet <- ggproto(
 #   ...
 #   init_scales = function(layout, x_scale = NULL, y_scale = NULL, params) {
